@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MAZIN SHOP | 3D Cyberpunk Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>MAZIN <span>SHOP</span></h1>
+                <p id="auth-subtitle">تسجيل الدخول إلى حسابك الخاص</p>
+            </div>
+
+            <div class="auth-form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="auth-username" class="auth-form-input" placeholder="أدخل اسم المستخدم">
+            </div>
+
+            <div class="auth-form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="auth-password" class="auth-form-input" placeholder="أدخل كلمة المرور">
+            </div>
+
+            <div class="captcha-box">
+                <div class="captcha-left">
+                    <div class="captcha-checkbox" id="captcha-box" onclick="toggleCaptcha()">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <span class="captcha-text">أنا لست روبوت (تحقق بشري)</span>
+                </div>
+                <div>
+                    <i class="fa-solid fa-shield-halved" style="color:var(--accent-green); font-size:18px;"></i>
+                    <div class="captcha-brand">MAZIN SECURE</div>
+                </div>
+            </div>
+
+            <button class="auth-submit-btn" id="auth-action-btn" onclick="handleAuthSubmit()">تسجيل الدخول</button>
+
+            <div class="auth-switch-mode" id="auth-switch-text">
+                ليس لديك حساب؟ <span onclick="toggleAuthMode()">إنشاء حساب جديد</span>
+            </div>
+        </div>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="{{ url_for('static', filename='mazin-music.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <button id="music-toggle-btn" onclick="toggleMusic()">
+        <i class="fa-solid fa-music" id="music-icon"></i>
+    </button>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div id="splash-screen">
+        <div class="splash-logo">MAZIN <span>SHOP</span></div>
+    </div>
+
+    <header class="navbar">
+        <div class="nav-actions">
+            <div class="wallet-container">
+                <div class="balance-badge">
+                    <i class="fa-solid fa-wallet"></i> <span id="user-balance">0.00</span>ج
+                </div>
+                <button class="add-balance-btn" onclick="openDepositModal()">+ شحن</button>
+            </div>
+
+            <div class="header-tools">
+                <button class="tool-icon-btn" onclick="switchTab('cart', null)">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cart-counter">0</span>
+                </button>
+                <button class="tool-icon-btn" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()">
+        <div class="sidebar-panel" onclick="event.stopPropagation()">
+            <div class="sidebar-header">
+                <div class="sidebar-user-info">
+                    مرحباً، <span id="sidebar-username-text" style="display:inline; color:var(--accent-green);">مازن</span>
+                    <span>الرصيد: <strong id="sidebar-balance-text" style="color:var(--accent-green);">0.00 ج</strong></span>
+                </div>
+                <button class="close-sidebar" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="sidebar-menu">
+                <div class="sidebar-item" onclick="switchTab('home', null); toggleSidebar();"><i class="fa-solid fa-house"></i> الرئيسية</div>
+                <div class="sidebar-item" onclick="switchTab('panels', null); toggleSidebar();"><i class="fa-solid fa-server"></i> البنلات والخدمات</div>
+                <div class="sidebar-item" onclick="switchTab('files', null); toggleSidebar();"><i class="fa-solid fa-file-code"></i> الملفات والسورس</div>
+                <div class="sidebar-item" onclick="switchTab('accounts', null); toggleSidebar();"><i class="fa-solid fa-address-card"></i> الحسابات</div>
+                <div class="sidebar-item" onclick="switchTab('deliveries', null); toggleSidebar();"><i class="fa-solid fa-box-open"></i> استلام طلباتك والأكواد</div>
+                <div class="sidebar-item" onclick="switchTab('cart', null); toggleSidebar();"><i class="fa-solid fa-cart-shopping"></i> سلة الشراء</div>
+                <div class="sidebar-item" onclick="switchTab('support', null); toggleSidebar();"><i class="fa-solid fa-headset"></i> الدعم الفني</div>
+                <div class="sidebar-item logout" onclick="handleLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> تسجيل الخروج</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deposit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-wallet"></i> شحن رصيد المحفظة</div>
+                <button class="close-modal" onclick="closeDepositModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="payment-info-box">
+                حول على فودافون كاش: <span id="dynamic-wallet-num">01004537303</span>
+            </div>
+            <div class="form-group">
+                <label>المبلغ (جنيه)</label>
+                <input type="number" id="deposit-amount-input" class="form-input" placeholder="مثال: 150">
+            </div>
+            <div class="form-group">
+                <label>رقم العملية / كود التحويل</label>
+                <input type="text" id="deposit-code-input" class="form-input" placeholder="أدخل رقم العملية">
+            </div>
+            <button class="submit-deposit-btn" onclick="confirmDeposit()">إرسال طلب الشحن للأدمن</button>
+        </div>
+    </div>
+
+    <div id="checkout-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-credit-card"></i> تأكيد إتمام الشراء بالرصيد</div>
+                <button class="close-modal" onclick="closeCheckoutModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="payment-info-box" id="checkout-modal-body"></div>
+            <div id="checkout-action-container"></div>
+        </div>
+    </div>
+
+    <main class="container">
+        <div id="tab-home" class="tab-content active">
+            <div class="main-section-group">
+                <div class="section-title"><i class="fa-solid fa-share-nodes"></i> منصات التواصل الاجتماعي</div>
+                <div class="home-social-card"><div class="home-social-info"><i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> واتساب</div><div id="home-whatsapp-slot"><span class="no-link-text">لم يتم إضافة أي لينكات</span></div></div>
+                <div class="home-social-card"><div class="home-social-info"><i class="fa-brands fa-telegram" style="color: #0088cc;"></i> تليجرام</div><div id="home-telegram-slot"><span class="no-link-text">لم يتم إضافة أي لينكات</span></div></div>
+                <div class="home-social-card"><div class="home-social-info"><i class="fa-brands fa-youtube" style="color: #ff0000;"></i> يوتيوب</div><div id="home-youtube-slot"><span class="no-link-text">لم يتم إضافة أي لينكات</span></div></div>
+                <div class="home-social-card"><div class="home-social-info"><i class="fa-brands fa-instagram" style="color: #e4405f;"></i> إنستجرام</div><div id="home-instagram-slot"><span class="no-link-text">لم يتم إضافة أي لينكات</span></div></div>
+                <div class="home-social-card"><div class="home-social-info"><i class="fa-brands fa-tiktok" style="color: #ff0050;"></i> تيك توك</div><div id="home-tiktok-slot"><span class="no-link-text">لم يتم إضافة أي لينكات</span></div></div>
+            </div>
+        </div>
+
+        <div id="tab-panels" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-server"></i> البنلات المتاحة</div>
+            <div class="store-grid" id="store-panels-grid"></div>
+        </div>
+
+        <div id="tab-files" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-file-code"></i> قسم الملفات والسورس</div>
+            <div class="store-grid" id="store-files-grid"></div>
+        </div>
+
+        <div id="tab-accounts" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-address-card"></i> الحسابات المتاحة</div>
+            <div class="store-grid" id="store-accounts-grid"></div>
+        </div>
+
+        <div id="tab-deliveries" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-box-open"></i> استلام طلباتك والأكواد ووسائل التشغيل</div>
+            <div class="deliveries-grid" id="user-deliveries-container"></div>
+        </div>
+
+        <div id="tab-cart" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-cart-shopping"></i> سلة الشراء الخاصة بك</div>
+            <div id="cart-items-container"></div>
+        </div>
+
+        <div id="tab-support" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-headset"></i> الدعم الفني ومسؤولي المبيعات</div>
+            <div class="support-grid" id="store-support-grid"></div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('home', this)"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+        <button class="nav-item" onclick="switchTab('panels', this)"><i class="fa-solid fa-server"></i><span>البنلات</span></button>
+        <button class="nav-item" onclick="switchTab('files', this)"><i class="fa-solid fa-file-code"></i><span>الملفات</span></button>
+        <button class="nav-item" onclick="switchTab('accounts', this)"><i class="fa-solid fa-address-card"></i><span>الحسابات</span></button>
+        <button class="nav-item" onclick="switchTab('deliveries', this)"><i class="fa-solid fa-box-open"></i><span>الاستلام</span></button>
+        <button class="nav-item" onclick="switchTab('cart', this)"><i class="fa-solid fa-cart-shopping"></i><span>السلة</span></button>
+        <button class="nav-item" onclick="switchTab('support', this)"><i class="fa-solid fa-headset"></i><span>الدعم</span></button>
+    </nav>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

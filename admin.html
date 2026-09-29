@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MAZIN SHOP | Secure Cyber Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-main: #030508;
+            --bg-card: rgba(10, 15, 25, 0.9);
+            --bg-card-hover: rgba(15, 23, 38, 0.98);
+            --border-color: rgba(16, 185, 129, 0.3);
+            --accent-green: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.4);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --danger-color: #ef4444;
+            --primary-blue: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        html, body { width: 100%; min-height: 100vh; background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; position: relative; }
+        body { display: flex; flex-direction: column; padding-bottom: 75px; box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.05); }
+
+        #admin-auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-main); display: flex; justify-content: center; align-items: center;
+            z-index: 99999; padding: 15px;
+        }
+
+        .admin-auth-card {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+            width: 100%; max-width: 360px; padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(16, 185, 129, 0.15);
+            backdrop-filter: blur(12px);
+        }
+
+        .auth-logo { text-align: center; margin-bottom: 15px; }
+        .auth-logo h1 { font-size: 20px; font-weight: 900; letter-spacing: 1px; color: var(--text-main); }
+        .auth-logo h1 span { color: var(--accent-green); text-shadow: 0 0 10px var(--accent-green); }
+        .auth-logo p { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+        .auth-form-group { margin-bottom: 10px; }
+        .auth-form-group label { display: block; font-size: 10px; font-weight: 700; margin-bottom: 3px; color: var(--text-muted); }
+        .auth-form-input { width: 100%; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; color: var(--text-main); font-size: 11px; outline: none; }
+        .auth-form-input:focus { border-color: var(--accent-green); box-shadow: 0 0 8px var(--accent-glow); }
+
+        .auth-submit-btn {
+            width: 100%; background: var(--accent-green); color: #030508; border: none;
+            padding: 9px; border-radius: 6px; font-size: 11px; font-weight: 900; cursor: pointer; transition: 0.2s; margin-top: 5px;
+        }
+        .auth-submit-btn:hover { box-shadow: 0 0 12px var(--accent-green); }
+
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; background: radial-gradient(circle at center, #07111e 0%, #030508 100%); }
+
+        .admin-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; background-color: rgba(6, 10, 18, 0.9);
+            border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;
+            backdrop-filter: blur(12px); width: 100%;
+        }
+        .admin-title-top { font-size: 13px; font-weight: 900; color: var(--accent-green); display: flex; align-items: center; gap: 6px; }
+        .go-store-btn { background: var(--bg-card-hover); color: var(--text-main); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 10px; font-size: 10px; font-weight: 700; cursor: pointer; text-decoration: none; }
+
+        .container { width: 100%; max-width: 950px; margin: 10px auto; padding: 0 10px; flex: 1; }
+        .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .tab-content.active { display: block; opacity: 1; }
+
+        .section-title { font-size: 13px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+        .section-title i { color: var(--accent-green); }
+
+        .admin-card-box {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 12px; margin-bottom: 10px; backdrop-filter: blur(10px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        .admin-card-box h3 { font-size: 12px; font-weight: 800; color: var(--accent-green); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 8px; }
+        @media(min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+
+        .admin-input {
+            width: 100%; background: var(--bg-main); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 7px 10px; color: var(--text-main); font-size: 11px; outline: none;
+        }
+        .admin-input:focus { border-color: var(--accent-green); box-shadow: 0 0 6px var(--accent-glow); }
+
+        .file-upload-wrapper {
+            background: var(--bg-main); border: 1px dashed var(--border-color); border-radius: 6px;
+            padding: 8px; text-align: center; cursor: pointer; font-size: 10px; color: var(--text-muted); margin-bottom: 8px;
+        }
+        .file-upload-wrapper:hover { border-color: var(--accent-green); color: var(--accent-green); }
+
+        .admin-btn {
+            background-color: var(--accent-green); color: #030508; border: none;
+            padding: 7px 14px; border-radius: 6px; font-size: 10px; font-weight: 900; cursor: pointer; transition: 0.2s;
+        }
+        .admin-btn:hover { box-shadow: 0 0 10px var(--accent-green); }
+        .admin-btn.danger { background-color: var(--danger-color); color: #fff; }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background-color: rgba(6, 10, 18, 0.95); border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-around; padding: 5px 0; z-index: 3000; backdrop-filter: blur(12px);
+        }
+        .nav-item {
+            background: none; border: none; color: var(--text-muted); font-size: 8px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; padding: 3px 5px; transition: 0.2s;
+        }
+        .nav-item i { font-size: 13px; }
+        .nav-item.active { color: var(--accent-green); text-shadow: 0 0 8px var(--accent-glow); }
+
+        .empty-state { text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 10px; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div id="admin-auth-overlay">
+        <div class="admin-auth-card">
+            <div class="auth-logo">
+                <h1>MAZIN <span>ADMIN</span></h1>
+                <p>تسجيل دخول المشرفين المعتمدين</p>
+            </div>
+            <div class="auth-form-group">
+                <label>اسم المستخدم (يوزر الأدمن)</label>
+                <input type="text" id="admin-user-input" class="admin-input" placeholder="أدخل يوزر الأدمن">
+            </div>
+            <div class="auth-form-group">
+                <label>كلمة المرور الخاصة</label>
+                <input type="password" id="admin-password-input" class="admin-input" placeholder="أدخل كلمة المرور">
+            </div>
+            <button class="auth-submit-btn" type="button" onclick="verifyAdminLogin()">دخول لوحة التحكم</button>
+        </div>
+    </div>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <header class="admin-header">
+        <div class="admin-title-top"><i class="fa-solid fa-shield-halved"></i> الإدارة والتحكم المصغر - متجر مازن شوب</div>
+        <a href="/" class="go-store-btn"><i class="fa-solid fa-store"></i> المتجر</a>
+    </header>
+
+    <main class="container">
+        
+        <div id="tab-orders" class="tab-content active">
+            <div class="section-title"><i class="fa-solid fa-box-archive"></i> طلبات الشراء المعلقة</div>
+            <div id="admin-orders-container"></div>
+        </div>
+
+        <div id="tab-deposits" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-wallet"></i> طلبات شحن الرصيد</div>
+            <div id="admin-deposits-container"></div>
+        </div>
+
+        <div id="tab-panels" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-server"></i> إدارة البنلات والخدمات</div>
+            <div class="admin-card-box">
+                <h3><i class="fa-solid fa-plus-circle"></i> إضافة بنل جديد برفع صورة من جهازك</h3>
+                <div class="form-grid">
+                    <input type="text" id="panel-name" class="admin-input" placeholder="اسم البنل">
+                    <div class="file-upload-wrapper" onclick="document.getElementById('panel-file-input').click()">
+                        <i class="fa-solid fa-image"></i> <span id="panel-file-label">اختر صورة أو فيديو من الجهاز</span>
+                        <input type="file" id="panel-file-input" style="display:none" accept="image/*,video/*" onchange="previewMedia(this, 'panel')">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:8px;">
+                    <textarea id="panel-desc" class="admin-input" rows="2" placeholder="وصف البنل..."></textarea>
+                </div>
+                <div class="form-grid">
+                    <input type="number" id="p-1h" class="admin-input" placeholder="سعر ساعة (ج)">
+                    <input type="number" id="p-3h" class="admin-input" placeholder="سعر 3 ساعات (ج)">
+                    <input type="number" id="p-6h" class="admin-input" placeholder="سعر 6 ساعات (ج)">
+                    <input type="number" id="p-12h" class="admin-input" placeholder="سعر 12 ساعة (ج)">
+                    <input type="number" id="p-1d" class="admin-input" placeholder="سعر يوم (ج)">
+                    <input type="number" id="p-1w" class="admin-input" placeholder="سعر أسبوع (ج)">
+                    <input type="number" id="p-1m" class="admin-input" placeholder="سعر شهر (ج)">
+                </div>
+                <button class="admin-btn" type="button" onclick="addNewPanel()">حفظ البنل</button>
+            </div>
+            <div id="admin-panels-list"></div>
+        </div>
+
+        <div id="tab-accounts" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-address-card"></i> إدارة الحسابات</div>
+            <div class="admin-card-box">
+                <h3><i class="fa-solid fa-plus-circle"></i> إضافة حساب جديد برفع صورة من جهازك</h3>
+                <div class="form-grid">
+                    <input type="text" id="account-name" class="admin-input" placeholder="اسم الحساب">
+                    <input type="number" id="account-price" class="admin-input" placeholder="السعر (ج)">
+                    <div class="file-upload-wrapper" onclick="document.getElementById('account-media-input').click()">
+                        <i class="fa-solid fa-image"></i> <span id="account-file-label">اختر صورة الحساب من الجهاز</span>
+                        <input type="file" id="account-media-input" style="display:none" accept="image/*" onchange="previewMedia(this, 'account')">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:8px;">
+                    <textarea id="account-desc" class="admin-input" rows="2" placeholder="وصف الحساب..."></textarea>
+                </div>
+                <button class="admin-btn" type="button" onclick="addNewAccount()">حفظ الحساب</button>
+            </div>
+            <div id="admin-accounts-products-list"></div>
+        </div>
+
+        <div id="tab-files" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-file-code"></i> إدارة الملفات والسورسات</div>
+            <div class="admin-card-box">
+                <h3><i class="fa-solid fa-plus-circle"></i> إضافة ملف مرفق من جهازك</h3>
+                <div class="form-grid">
+                    <input type="text" id="file-name" class="admin-input" placeholder="اسم الملف">
+                    <input type="number" id="file-price" class="admin-input" placeholder="السعر (ج)">
+                    <div class="file-upload-wrapper" onclick="document.getElementById('file-media-input').click()">
+                        <i class="fa-solid fa-image"></i> <span id="file-file-label">اختر صورة أو ملف معاينة</span>
+                        <input type="file" id="file-media-input" style="display:none" accept="image/*,video/*" onchange="previewMedia(this, 'file')">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:8px;">
+                    <textarea id="file-desc" class="admin-input" rows="2" placeholder="وصف الملف..."></textarea>
+                </div>
+                <button class="admin-btn" type="button" onclick="addNewFile()">حفظ الملف</button>
+            </div>
+            <div id="admin-files-list"></div>
+        </div>
+
+        <div id="tab-users" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-users"></i> المستخدمين المسجلين في المتجر</div>
+            <div class="admin-card-box">
+                <div id="admin-users-count" style="font-size:12px; font-weight:800; color:var(--accent-green);">جاري التحميل...</div>
+            </div>
+            <div id="admin-users-list"></div>
+        </div>
+
+        <div id="tab-settings" class="tab-content">
+            <div class="section-title"><i class="fa-solid fa-user-shield"></i> إدارة حسابات المشرفين (الأدمن)</div>
+            <div class="admin-card-box">
+                <h3><i class="fa-solid fa-user-plus"></i> إضافة أدمن جديد برتبة خاصة</h3>
+                <div class="form-grid">
+                    <input type="text" id="new-admin-user" class="admin-input" placeholder="اسم يوزر الأدمن الجديد">
+                    <input type="password" id="new-admin-pass" class="admin-input" placeholder="كلمة المرور الخاصة به">
+                </div>
+                <button class="admin-btn" type="button" style="margin-top:8px;" onclick="addNewAdmin()">إضافة حساب أدمن جديد</button>
+            </div>
+            <div id="admin-accounts-list"></div>
+
+            <div class="section-title" style="margin-top:15px;"><i class="fa-solid fa-share-nodes"></i> إدارة روابط التواصل الاجتماعي والدعم</div>
+            <div class="admin-card-box">
+                <h3><i class="fa-solid fa-link"></i> روابط السوشيال ميديا وقنوات التواصل</h3>
+                <div class="form-grid" style="margin-bottom:8px;">
+                    <div>
+                        <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">رابط الواتساب</label>
+                        <input type="text" id="social-whatsapp" class="admin-input" placeholder="https://wa.me/...">
+                    </div>
+                    <div>
+                        <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">رابط التليجرام (Telegram)</label>
+                        <input type="text" id="social-telegram" class="admin-input" placeholder="https://t.me/...">
+                    </div>
+                    <div>
+                        <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">رابط تيك توك</label>
+                        <input type="text" id="social-tiktok" class="admin-input" placeholder="https://tiktok.com/@...">
+                    </div>
+                    <div>
+                        <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">رابط إنستغرام</label>
+                        <input type="text" id="social-instagram" class="admin-input" placeholder="https://instagram.com/...">
+                    </div>
+                    <div>
+                        <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">رابط يوتيوب</label>
+                        <input type="text" id="social-youtube" class="admin-input" placeholder="https://youtube.com/@...">
+                    </div>
+                </div>
+                <button class="admin-btn" type="button" onclick="saveSocialLinks()">حفظ روابط السوشيال ميديا</button>
+            </div>
+
+            <div class="section-title" style="margin-top:15px;"><i class="fa-solid fa-headset"></i> بيانات الدعم الفني (قسم الدعم في المتجر)</div>
+            <div class="admin-card-box">
+                <h3><i class="fa-solid fa-headset"></i> أرقام وروابط التواصل مع الدعم الفني</h3>
+                <div class="form-grid" style="margin-bottom:8px;">
+                    <div>
+                        <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">واتساب الدعم الفني</label>
+                        <input type="text" id="support-whatsapp" class="admin-input" placeholder="رقم أو رابط واتساب">
+                    </div>
+                    <div>
+                        <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">تليجرام الدعم الفني</label>
+                        <input type="text" id="support-telegram" class="admin-input" placeholder="معرف أو رابط تليجرام">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:8px;">
+                    <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">رسالة الدعم الفني اللي تظهر للعميل</label>
+                    <textarea id="support-message" class="admin-input" rows="2" placeholder="تواصل معنا لأي استفسار"></textarea>
+                </div>
+                <button class="admin-btn" type="button" onclick="saveSupportSettings()">حفظ بيانات الدعم الفني</button>
+            </div>
+
+            <div class="section-title" style="margin-top:15px;"><i class="fa-solid fa-gear"></i> إعدادات المتجر والرصيد</div>
+            <div class="admin-card-box">
+                <h3><i class="fa-solid fa-wallet"></i> إضافة رصيد لمستخدم يدوياً</h3>
+                <div class="form-grid" style="margin-bottom:8px;">
+                    <input type="text" id="add-balance-user" class="admin-input" placeholder="اسم المستخدم">
+                    <input type="number" id="add-balance-amount" class="admin-input" placeholder="المبلغ المراد إضافته">
+                </div>
+                <button class="admin-btn" type="button" onclick="addBalanceToUser()">إضافة الرصيد</button>
+            </div>
+            <div class="admin-card-box">
+                <h3><i class="fa-solid fa-wallet"></i> رقم فودافون كاش</h3>
+                <div class="form-grid" style="margin-bottom:8px;">
+                    <input type="text" id="admin-wallet-input" class="admin-input" placeholder="رقم المحفظة">
+                    <button class="admin-btn" type="button" onclick="saveWalletNumber()">حفظ الرقم</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" type="button" onclick="switchAdminTab('orders', this)"><i class="fa-solid fa-box-archive"></i><span>الطلبات</span></button>
+        <button class="nav-item" type="button" onclick="switchAdminTab('deposits', this)"><i class="fa-solid fa-wallet"></i><span>الشحن</span></button>
+        <button class="nav-item" type="button" onclick="switchAdminTab('panels', this)"><i class="fa-solid fa-server"></i><span>البنلات</span></button>
+        <button class="nav-item" type="button" onclick="switchAdminTab('files', this)"><i class="fa-solid fa-file-code"></i><span>الملفات</span></button>
+        <button class="nav-item" type="button" onclick="switchAdminTab('accounts', this)"><i class="fa-solid fa-address-card"></i><span>الحسابات</span></button>
+        <button class="nav-item" type="button" onclick="switchAdminTab('users', this)"><i class="fa-solid fa-users"></i><span>المستخدمين</span></button>
+        <button class="nav-item" type="button" onclick="switchAdminTab('settings', this)"><i class="fa-solid fa-user-shield"></i><span>الأدمن</span></button>
+    </nav>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000';
+        let uploadedPanelMedia = '';
+        let uploadedFileMedia = '';
+        let uploadedAccountMedia = '';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let isAdminAuth = sessionStorage.getItem('mazin_admin_logged');
+            if(isAdminAuth === 'true') {
+                document.getElementById('admin-auth-overlay').style.display = 'none';
+                loadAdminData();
+            }
+            animateCyberGrid();
+        });
+
+        function verifyAdminLogin() {
+            let uInput = document.getElementById('admin-user-input').value.trim();
+            let pInput = document.getElementById('admin-password-input').value.trim();
+            
+            fetch(`${API_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: uInput, password: pInput })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success && data.role === 'admin') {
+                    sessionStorage.setItem('mazin_admin_logged', 'true');
+                    sessionStorage.setItem('mazin_current_admin', uInput);
+                    document.getElementById('admin-auth-overlay').style.display = 'none';
+                    loadAdminData();
+                } else {
+                    alert('اسم المستخدم أو كلمة المرور غير صحيحة!');
+                }
+            }).catch(() => {
+                alert('تعذر الاتصال بالسيرفر، تأكد إن السيرفر شغال وحاول مرة أخرى.');
+            });
+        }
+
+        function addNewAdmin() {
+            let newUser = document.getElementById('new-admin-user').value.trim();
+            let newPass = document.getElementById('new-admin-pass').value.trim();
+            if(!newUser || !newPass) { alert('أدخل اليوزر وكلمة المرور للإدمن الجديد'); return; }
+
+            fetch(`${API_URL}/api/admin/create-admin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: newUser, password: newPass })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(!data.success) { alert(data.message || 'حدث خطأ أثناء إضافة الأدمن.'); return; }
+                alert(data.message || 'تمت إضافة حساب الأدمن بنجاح!');
+                document.getElementById('new-admin-user').value = '';
+                document.getElementById('new-admin-pass').value = '';
+                renderAdminAccounts();
+            })
+            .catch(() => {
+                alert('تعذر إضافة حساب الأدمن الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function renderAdminAccounts() {
+            let list = document.getElementById('admin-accounts-list');
+            if(!list) return;
+
+            fetch(`${API_URL}/api/admin/users`)
+            .then(res => res.json())
+            .then(data => {
+                let admins = (data.users || []).filter(u => u.role === 'admin');
+                let html = '<div style="font-size:11px; margin-bottom:8px; color:var(--text-muted);">الأدمنز المسجلين حالياً:</div>';
+                admins.forEach(u => {
+                    html += `
+                        <div class="admin-card-box" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; margin-bottom:6px;">
+                            <div><i class="fa-solid fa-user-shield" style="color:var(--accent-green);"></i> اليوزر: <strong>${u.username}</strong></div>
+                            <button class="admin-btn danger" type="button" style="padding:3px 8px; font-size:9px;" onclick="deleteUserAccount('${u.username}')">حذف</button>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+            })
+            .catch(() => {
+                list.innerHTML = '<div class="empty-state">تعذر تحميل حسابات الأدمن.</div>';
+            });
+        }
+
+        function switchAdminTab(tabName, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => item.classList.remove('active'));
+            let tabElem = document.getElementById('tab-' + tabName);
+            if(tabElem) tabElem.classList.add('active');
+            if(btnElement) btnElement.classList.add('active');
+            if(tabName === 'orders') renderAdminOrders();
+            if(tabName === 'accounts') renderAdminAccountsProducts();
+            if(tabName === 'users') renderAdminUsersStats();
+        }
+
+        function loadAdminData() {
+            renderAdminOrders();
+            renderAdminDeposits();
+            renderAdminPanels();
+            renderAdminFiles();
+            renderAdminAccountsProducts();
+            renderAdminAccounts();
+            renderAdminUsersStats();
+            loadSettingsInputs();
+            startAdminAutoRefresh();
+        }
+
+        function renderAdminUsersStats() {
+            let countBox = document.getElementById('admin-users-count');
+            let listBox = document.getElementById('admin-users-list');
+            if(!countBox || !listBox) return;
+
+            fetch(`${API_URL}/api/admin/users`)
+            .then(res => res.json())
+            .then(data => {
+                let users = data.users || [];
+                countBox.innerText = `عدد المستخدمين المسجلين: ${data.count || users.length}`;
+                if(users.length === 0) { listBox.innerHTML = ''; return; }
+                let html = '';
+                users.forEach((u, idx) => {
+                    html += `
+                        <div class="admin-card-box">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div style="font-size:11px;"><i class="fa-solid fa-user" style="color:var(--accent-green);"></i> <strong>${u.username}</strong> ${u.role === 'admin' ? '<span style="color:var(--accent-green); font-size:9px;">(أدمن)</span>' : ''}</div>
+                                <div style="font-size:11px; font-weight:800; color:var(--accent-green);">${u.balance} ج</div>
+                            </div>
+                            <div style="display:flex; gap:6px; margin-bottom:4px;">
+                                <input type="number" id="user-balance-input-${idx}" class="admin-input" placeholder="مبلغ الإضافة" style="flex:1;">
+                                <button class="admin-btn" type="button" style="white-space:nowrap;" onclick="addBalanceToSpecificUser(${idx}, '${u.username}')">إضافة/خصم</button>
+                            </div>
+                            <div style="font-size:9px; color:var(--text-muted); margin-bottom:6px;">اكتب رقم موجب للإضافة، أو بالسالب (زي -50) للخصم من الرصيد.</div>
+                            <div style="display:flex; gap:6px;">
+                                <input type="number" id="user-set-balance-input-${idx}" class="admin-input" placeholder="حدد الرصيد بالظبط" style="flex:1;">
+                                <button class="admin-btn" type="button" style="white-space:nowrap; background-color:var(--primary-blue);" onclick="setBalanceForSpecificUser(${idx}, '${u.username}')">تحديد الرصيد</button>
+                                <button class="admin-btn danger" type="button" onclick="deleteUserAccount('${u.username}')">حذف</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                listBox.innerHTML = html;
+            })
+            .catch(() => {
+                countBox.innerText = 'تعذر تحميل بيانات المستخدمين.';
+            });
+        }
+
+        function addBalanceToSpecificUser(idx, username) {
+            let input = document.getElementById('user-balance-input-' + idx);
+            let amount = input.value.trim();
+            if(!amount || isNaN(amount)) { alert('أدخل مبلغ صحيح!'); return; }
+
+            fetch(`${API_URL}/api/admin/add-balance`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, amount: amount })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || 'تمت العملية بنجاح');
+                renderAdminUsersStats();
+            })
+            .catch(() => {
+                alert('تعذر تنفيذ العملية الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function setBalanceForSpecificUser(idx, username) {
+            let input = document.getElementById('user-set-balance-input-' + idx);
+            let amount = input.value.trim();
+            if(amount === '' || isNaN(amount)) { alert('أدخل مبلغ صحيح!'); return; }
+            if(!confirm(`متأكد إنك عايز تخلي رصيد "${username}" يبقى ${amount} ج بالظبط؟`)) return;
+
+            fetch(`${API_URL}/api/admin/set-balance`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, amount: amount })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || 'تم تحديد الرصيد بنجاح');
+                renderAdminUsersStats();
+            })
+            .catch(() => {
+                alert('تعذر تحديد الرصيد الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function deleteUserAccount(username) {
+            if(!confirm(`متأكد إنك عايز تحذف المستخدم "${username}" نهائياً من المتجر؟ الإجراء ده لا يمكن التراجع عنه.`)) return;
+
+            fetch(`${API_URL}/api/admin/delete-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || 'تم الحذف بنجاح');
+                renderAdminUsersStats();
+            })
+            .catch(() => {
+                alert('تعذر حذف المستخدم الآن، حاول مرة أخرى.');
+            });
+        }
+
+        let adminAutoRefreshStarted = false;
+        function startAdminAutoRefresh() {
+            if (adminAutoRefreshStarted) return;
+            adminAutoRefreshStarted = true;
+            setInterval(() => {
+                renderAdminDeposits();
+                renderAdminPanels();
+                renderAdminFiles();
+                renderAdminAccountsProducts();
+            }, 8000);
+        }
+
+        function previewMedia(input, type) {
+            if (input.files && input.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    if(type === 'panel') {
+                        uploadedPanelMedia = e.target.result;
+                        document.getElementById('panel-file-label').innerText = "تم إرفاق الملف بنجاح ✔️";
+                    } else if(type === 'account') {
+                        uploadedAccountMedia = e.target.result;
+                        document.getElementById('account-file-label').innerText = "تم إرفاق الصورة بنجاح ✔️";
+                    } else {
+                        uploadedFileMedia = e.target.result;
+                        document.getElementById('file-file-label').innerText = "تم إرفاق الملف بنجاح ✔️";
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function renderAdminOrders() {
+            let container = document.getElementById('admin-orders-container');
+            if(!container) return;
+            
+            fetch(`${API_URL}/api/admin/orders`)
+            .then(res => res.json())
+            .then(data => {
+                let orders = data.orders || [];
+                if(orders.length === 0) {
+                    container.innerHTML = '<div class="empty-state">لا توجد طلبات شراء معلقة حالياً.</div>';
+                    return;
+                }
+                let html = '';
+                orders.forEach((ord, index) => {
+                    let itemsList = Array.isArray(ord.items) ? ord.items.map(it => (it.name || 'منتج') + ' (' + (it.price || 0) + 'ج)').join(', ') : 'طلب منتجات';
+                    let timeStr = ord.dateTime ? `<div style="font-size:9px; color:var(--accent-green); margin-bottom:3px;"><i class="fa-regular fa-clock"></i> ${ord.dateTime}</div>` : '';
+                    
+                    html += `
+                        <div class="admin-card-box">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <strong style="font-size:11px;"><i class="fa-solid fa-user"></i> العميل: ${ord.user}</strong>
+                                <span style="color:var(--accent-green); font-weight:900; font-size:11px;">الإجمالي: ${ord.total} ج</span>
+                            </div>
+                            ${timeStr}
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:6px;"><strong>المنتجات:</strong> ${itemsList}</div>
+                            <div class="form-group" style="margin-bottom:6px;">
+                                <textarea id="admin-reply-code-${index}" class="admin-input" rows="2" placeholder="أدخل كود التشغيل أو رابط الملف للعميل..."></textarea>
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <button class="admin-btn" type="button" onclick="fulfillOrder(${index})"><i class="fa-solid fa-check"></i> إرسال الكود وإتمام الطلب</button>
+                                <button class="admin-btn danger" type="button" onclick="deleteOrderApi(${index})"><i class="fa-solid fa-trash"></i> حذف</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }).catch(() => {
+                container.innerHTML = '<div class="empty-state">خطأ في جلب الطلبات من السيرفر.</div>';
+            });
+        }
+
+        function fulfillOrder(index) {
+            let replyCode = document.getElementById('admin-reply-code-' + index).value.trim();
+            if(!replyCode) { alert('يرجى كتابة الكود أولاً!'); return; }
+            
+            fetch(`${API_URL}/api/admin/fulfill-order`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index, code: replyCode })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(!data.success) { alert(data.message || 'حدث خطأ أثناء إرسال الكود.'); return; }
+                alert(data.message || 'تم إرسال الكود وإتمام الطلب بنجاح!');
+                renderAdminOrders();
+            }).catch(() => {
+                alert('تعذر إرسال الكود الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function deleteOrderApi(index) {
+            fetch(`${API_URL}/api/admin/delete-order`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                renderAdminOrders();
+            });
+        }
+
+        function renderAdminDeposits() {
+            let container = document.getElementById('admin-deposits-container');
+            if(!container) return;
+
+            fetch(`${API_URL}/api/admin/deposits`)
+            .then(res => res.json())
+            .then(data => {
+                let deposits = data.deposits || [];
+                if(deposits.length === 0) {
+                    container.innerHTML = '<div class="empty-state">لا توجد طلبات شحن معلقة حالياً.</div>';
+                    return;
+                }
+                let html = '';
+                deposits.forEach((dep, index) => {
+                    html += `
+                        <div class="admin-card-box">
+                            <div style="font-size:11px; font-weight:800; margin-bottom:3px;">المستخدم: <span style="color:var(--accent-green);">${dep.user}</span></div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:3px;">المبلغ: <strong style="color:var(--text-main);">${dep.amount} ج</strong></div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:6px;">كود التحويل: <span style="color:var(--primary-blue); font-family:monospace;">${dep.code}</span></div>
+                            <div style="display:flex; gap:6px;">
+                                <button class="admin-btn" type="button" onclick="approveDepositApi('${dep.user}', ${dep.amount}, ${index})"><i class="fa-solid fa-check"></i> موافقة وإضافة الرصيد</button>
+                                <button class="admin-btn danger" type="button" onclick="rejectDepositApi(${index})"><i class="fa-solid fa-xmark"></i> رفض</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }).catch(() => {
+                container.innerHTML = '<div class="empty-state">خطأ في جلب طلبات الشحن من السيرفر.</div>';
+            });
+        }
+
+        function approveDepositApi(username, amount, index) {
+            fetch(`${API_URL}/api/admin/add-balance`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, amount: amount })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    return fetch(`${API_URL}/api/admin/reject-deposit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ index: index })
+                    }).then(() => {
+                        alert(data.message || 'تمت الموافقة وإضافة الرصيد بنجاح!');
+                        renderAdminDeposits();
+                    });
+                } else {
+                    alert(data.message || 'حدث خطأ أثناء إضافة الرصيد');
+                }
+            }).catch(() => {
+                alert('حدث خطأ أثناء إضافة الرصيد للسيرفر');
+            });
+        }
+
+        function rejectDepositApi(index) {
+            fetch(`${API_URL}/api/admin/reject-deposit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                renderAdminDeposits();
+            }).catch(() => {
+                alert('حدث خطأ أثناء رفض الطلب');
+            });
+        }
+
+        function addBalanceToUser() {
+            let username = document.getElementById('add-balance-user').value.trim();
+            let amount = document.getElementById('add-balance-amount').value.trim();
+            if(!username || !amount) { alert('أدخل اسم المستخدم والمبلغ!'); return; }
+
+            fetch(`${API_URL}/api/admin/add-balance`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, amount: amount })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || 'تمت العملية بنجاح');
+                document.getElementById('add-balance-user').value = '';
+                document.getElementById('add-balance-amount').value = '';
+            });
+        }
+
+        function addNewPanel() {
+            let name = document.getElementById('panel-name').value.trim();
+            let desc = document.getElementById('panel-desc').value.trim();
+            let img = uploadedPanelMedia || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=300';
+            
+            let prices = {
+                '1h': parseFloat(document.getElementById('p-1h').value) || 10,
+                '3h': parseFloat(document.getElementById('p-3h').value) || 25,
+                '6h': parseFloat(document.getElementById('p-6h').value) || 40,
+                '12h': parseFloat(document.getElementById('p-12h').value) || 60,
+                '1d': parseFloat(document.getElementById('p-1d').value) || 50,
+                '1w': parseFloat(document.getElementById('p-1w').value) || 300,
+                '1m': parseFloat(document.getElementById('p-1m').value) || 900
+            };
+
+            if(!name) { alert('أدخل اسم البنل.'); return; }
+
+            fetch(`${API_URL}/api/admin/panels`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, desc, img, prices })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(!data.success) { alert(data.message || 'حدث خطأ أثناء إضافة البنل.'); return; }
+                alert('تمت إضافة البنل بنجاح!');
+                document.getElementById('panel-name').value = '';
+                document.getElementById('panel-desc').value = '';
+                uploadedPanelMedia = '';
+                document.getElementById('panel-file-label').innerText = "اختر صورة أو فيديو من الجهاز";
+                renderAdminPanels();
+            })
+            .catch(() => {
+                alert('تعذر إضافة البنل الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function renderAdminPanels() {
+            let list = document.getElementById('admin-panels-list');
+            if(!list) return;
+
+            fetch(`${API_URL}/api/panels`)
+            .then(res => res.json())
+            .then(data => {
+                let panels = data.panels || [];
+                if(panels.length === 0) { list.innerHTML = ''; return; }
+                let html = '<div class="section-title" style="margin-top:10px;">البنلات الحالية</div>';
+                panels.forEach((p, idx) => {
+                    html += `
+                        <div class="admin-card-box" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px;">
+                            <div style="font-size:11px;"><strong>${p.name}</strong> - <span style="color:var(--accent-green);">${(p.prices && p.prices['1d']) || 0}ج/يوم</span></div>
+                            <button class="admin-btn danger" type="button" style="padding:3px 8px; font-size:9px;" onclick="deletePanel(${idx})">حذف</button>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+            })
+            .catch(() => {});
+        }
+
+        function deletePanel(index) {
+            fetch(`${API_URL}/api/admin/delete-panel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                renderAdminPanels();
+            })
+            .catch(() => {
+                alert('تعذر حذف البنل الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function addNewFile() {
+            let name = document.getElementById('file-name').value.trim();
+            let price = parseFloat(document.getElementById('file-price').value) || 0;
+            let desc = document.getElementById('file-desc').value.trim();
+            let img = uploadedFileMedia || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=300';
+
+            if(!name) { alert('أدخل اسم الملف.'); return; }
+
+            fetch(`${API_URL}/api/admin/files`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, desc, img, price })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(!data.success) { alert(data.message || 'حدث خطأ أثناء إضافة الملف.'); return; }
+                alert('تمت إضافة الملف بنجاح!');
+                document.getElementById('file-name').value = '';
+                document.getElementById('file-price').value = '';
+                document.getElementById('file-desc').value = '';
+                uploadedFileMedia = '';
+                document.getElementById('file-file-label').innerText = "اختر صورة أو ملف معاينة";
+                renderAdminFiles();
+            })
+            .catch(() => {
+                alert('تعذر إضافة الملف الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function renderAdminFiles() {
+            let list = document.getElementById('admin-files-list');
+            if(!list) return;
+
+            fetch(`${API_URL}/api/files`)
+            .then(res => res.json())
+            .then(data => {
+                let files = data.files || [];
+                if(files.length === 0) { list.innerHTML = ''; return; }
+                let html = '<div class="section-title" style="margin-top:10px;">الملفات الحالية</div>';
+                files.forEach((f, idx) => {
+                    html += `
+                        <div class="admin-card-box" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px;">
+                            <div style="font-size:11px;"><strong>${f.name}</strong> - <span style="color:var(--accent-green);">${f.price}ج</span></div>
+                            <button class="admin-btn danger" type="button" style="padding:3px 8px; font-size:9px;" onclick="deleteFile(${idx})">حذف</button>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+            })
+            .catch(() => {});
+        }
+
+        function deleteFile(index) {
+            fetch(`${API_URL}/api/admin/delete-file`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                renderAdminFiles();
+            })
+            .catch(() => {
+                alert('تعذر حذف الملف الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function addNewAccount() {
+            let name = document.getElementById('account-name').value.trim();
+            let price = parseFloat(document.getElementById('account-price').value) || 0;
+            let desc = document.getElementById('account-desc').value.trim();
+            let img = uploadedAccountMedia || 'https://images.unsplash.com/photo-1633265486064-086b219458ec?w=300';
+
+            if(!name) { alert('أدخل اسم الحساب.'); return; }
+
+            fetch(`${API_URL}/api/admin/accounts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, desc, img, price })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(!data.success) { alert(data.message || 'حدث خطأ أثناء إضافة الحساب.'); return; }
+                alert('تمت إضافة الحساب بنجاح!');
+                document.getElementById('account-name').value = '';
+                document.getElementById('account-price').value = '';
+                document.getElementById('account-desc').value = '';
+                uploadedAccountMedia = '';
+                document.getElementById('account-file-label').innerText = "اختر صورة الحساب من الجهاز";
+                renderAdminAccountsProducts();
+            })
+            .catch(() => {
+                alert('تعذر إضافة الحساب الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function renderAdminAccountsProducts() {
+            let list = document.getElementById('admin-accounts-products-list');
+            if(!list) return;
+
+            fetch(`${API_URL}/api/accounts`)
+            .then(res => res.json())
+            .then(data => {
+                let accounts = data.accounts || [];
+                if(accounts.length === 0) { list.innerHTML = ''; return; }
+                let html = '<div class="section-title" style="margin-top:10px;">الحسابات الحالية</div>';
+                accounts.forEach((a, idx) => {
+                    html += `
+                        <div class="admin-card-box" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px;">
+                            <div style="font-size:11px;"><strong>${a.name}</strong> - <span style="color:var(--accent-green);">${a.price}ج</span></div>
+                            <button class="admin-btn danger" type="button" style="padding:3px 8px; font-size:9px;" onclick="deleteAccount(${idx})">حذف</button>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+            })
+            .catch(() => {});
+        }
+
+        function deleteAccount(index) {
+            fetch(`${API_URL}/api/admin/delete-account`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                renderAdminAccountsProducts();
+            })
+            .catch(() => {
+                alert('تعذر حذف الحساب الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function saveWalletNumber() {
+            let num = document.getElementById('admin-wallet-input').value.trim();
+            if(!num) { alert('أدخل رقم المحفظة أولاً!'); return; }
+
+            fetch(`${API_URL}/api/admin/settings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ wallet: num })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || 'تم حفظ رقم المحفظة بنجاح!');
+            })
+            .catch(() => {
+                alert('تعذر حفظ رقم المحفظة الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function saveSocialLinks() {
+            let socialLinks = {
+                whatsapp: document.getElementById('social-whatsapp').value.trim(),
+                telegram: document.getElementById('social-telegram').value.trim(),
+                tiktok: document.getElementById('social-tiktok').value.trim(),
+                instagram: document.getElementById('social-instagram').value.trim(),
+                youtube: document.getElementById('social-youtube').value.trim()
+            };
+
+            fetch(`${API_URL}/api/admin/settings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ social: socialLinks })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || 'تم حفظ روابط السوشيال ميديا بنجاح!');
+            })
+            .catch(() => {
+                alert('تعذر حفظ روابط السوشيال ميديا الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function saveSupportSettings() {
+            let supportData = {
+                whatsapp: document.getElementById('support-whatsapp').value.trim(),
+                telegram: document.getElementById('support-telegram').value.trim(),
+                message: document.getElementById('support-message').value.trim()
+            };
+
+            fetch(`${API_URL}/api/admin/settings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ support: supportData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || 'تم حفظ بيانات الدعم الفني بنجاح!');
+            })
+            .catch(() => {
+                alert('تعذر حفظ بيانات الدعم الفني الآن، حاول مرة أخرى.');
+            });
+        }
+
+        function loadSettingsInputs() {
+            fetch(`${API_URL}/api/settings`)
+            .then(res => res.json())
+            .then(data => {
+                let settings = data.settings || {};
+
+                if(settings.wallet) {
+                    document.getElementById('admin-wallet-input').value = settings.wallet;
+                }
+
+                let social = settings.social || {};
+                if(social.whatsapp) document.getElementById('social-whatsapp').value = social.whatsapp;
+                if(social.telegram) document.getElementById('social-telegram').value = social.telegram;
+                if(social.tiktok) document.getElementById('social-tiktok').value = social.tiktok;
+                if(social.instagram) document.getElementById('social-instagram').value = social.instagram;
+                if(social.youtube) document.getElementById('social-youtube').value = social.youtube;
+
+                let support = settings.support || {};
+                if(support.whatsapp) document.getElementById('support-whatsapp').value = support.whatsapp;
+                if(support.telegram) document.getElementById('support-telegram').value = support.telegram;
+                if(support.message) document.getElementById('support-message').value = support.message;
+            })
+            .catch(() => {});
+        }
+
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let gridOffset = 0;
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function animateCyberGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.06)';
+            ctx.lineWidth = 1;
+            gridOffset = (gridOffset + 0.4) % 30;
+            let horizonY = canvas.height * 0.4;
+            for (let y = horizonY; y < canvas.height; y += (y - horizonY) * 0.1 + 5) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+            for (let x = -canvas.width; x < canvas.width * 2; x += 50) {
+                ctx.beginPath(); ctx.moveTo(canvas.width / 2, horizonY); ctx.lineTo(x + gridOffset * 2, canvas.height); ctx.stroke();
+            }
+            requestAnimationFrame(animateCyberGrid);
+        }
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12') e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) e.preventDefault();
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) e.preventDefault();
+        });
+    </script>
+</body>
+</html>
